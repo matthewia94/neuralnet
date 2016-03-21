@@ -5,53 +5,57 @@
  *      Author: matt
  */
 
-#ifndef NAVIGATION_INCLUDE_NAVIGATION_NEURAL_NETWORK_H_
-#define NAVIGATION_INCLUDE_NAVIGATION_NEURAL_NETWORK_H_
+#ifndef NEURAL_NETWORK_H_
+#define NEURAL_NETWORK_H_
 
-#include <ros/ros.h>
+#include <cstdlib>
 #include <cmath>
+#include <random>
+#include <iostream>
 
+template <typename T>
+class NeuralNetwork;
+
+template <typename T>
+std::istream& operator>>(std::istream& is, const NeuralNetwork<T>& n);
+
+template <typename T>
 class NeuralNetwork
 {
-private:
-    int m_num_input;
-    int m_num_hidden;
-    int m_num_output;
+    private:
+        int m_num_input;
+        int m_num_hidden;
+        int m_num_output;
+        double m_learning_rate;
 
-    //Input to hidden arrays
-    double* inputs;
-    double** ih_weights;
-    double* ih_sums;
-    double* ih_biases;
-    double* ih_outputs;
+        //Input to hidden arrays
+        T* inputs;
+        T** ih_weights;
+        T* ih_outputs;
 
-    //Output to hidden arrays
-    double** ho_weights;
-    double* ho_sums;
-    double* ho_biases;
-    double* outputs;
+        //Output to hidden arrays
+        T** ho_weights;
+        T* outputs;
 
-    double* o_grads; //output gradients
-    double* h_grads; //hidden gradients
+        double sigmoidFunction(T x);
 
-    //Momentum arrays
-    double** ih_prev_weights_delta;
-    double* ih_prev_biases_delta;
-    double** ho_prev_weights_delta;
-    double* ho_prev_biases_delta;
+    public:
+        NeuralNetwork(int num_input, int num_hidden, int num_output, double learning_rate);
+        ~NeuralNetwork();
 
-    double sigmoidFunction(double x);
-    double hyperTanFunction(double x);
+        //Print functions
+        void printInput();
+        void printHidden();
+        void printOutput();
 
-public:
-    NeuralNetwork(int num_input, int num_hidden, int num_output);
-    ~NeuralNetwork();
+        //Input functions
+        friend std::istream& operator>> <T>(std::istream& is, const NeuralNetwork<T>& n);
 
-    void updateWeights(double weights[]);
-    void setWeights(double weights[]);
-
-    double* getWeights();
-    double* computeOutputs();
+        void resetWeights();
+        double* computeOutputs();
+        void backPropagation(const T outputs[]);
 };
 
-#endif /* NAVIGATION_INCLUDE_NAVIGATION_NEURAL_NETWORK_H_ */
+#include "neural_network.hpp"
+
+#endif /* NEURAL_NETWORK_H_ */
